@@ -156,6 +156,7 @@ Plan:
 - Measles/Rubella 2 still pending – advise mother to take child to immunization clinic.
 - Continue Vitamin A as per national schedule.
 - Counselling on nutrition, handwashing, and use of safe drinking water.
+
 Click "Choose File" and select your health-record.txt file
 
 Expected Result: You should earn 6 IMT tokens for uploading health records containing ANC, immunization, and growth data
@@ -174,6 +175,7 @@ Expected Result: Earn 6 IMT tokens
 In the AI Assistant section, type this exact question:
 
 Hi Imhotep-III, How are you today? Now, based on the available health records, can you give me a personalized health insights for proactive healthcare
+
 Expected Result: The AI will analyze the uploaded health records and provide personalized insights including:
 
 Immunization status and recommendations
@@ -257,6 +259,7 @@ GET /api/test-ai - AI connectivity test
 ✅ Automated token rewards for health actions
 
 📊 Expected Impact
+
 30% reduction in missed antenatal care visits
 
 25% increase in child immunization rates
