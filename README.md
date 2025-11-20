@@ -38,26 +38,48 @@ Imhotep-III combines Blockchain, AI, and DeFi to create a comprehensive health p
    ```bash
    git clone https://github.com/yourusername/imhotep-iii.git
    cd imhotep-iii
+
+
 Install dependencies
 
-bash
+
 npm install
+
+
+
 Set up environment variables
+
+
 Create .env file:
 
-env
+
+
 GEMINI_API_KEY=your_google_ai_api_key_here
 PORT=3000
+
+
+
 Start the development server
 
-bash
+
 npm run dev
+
+
 Access the application
+
+
 Open http://localhost:3000 in your browser
 
+
 🎮 How to Test the Application
+
+
 Option 1: Use Live Deployment
+
+
 Visit: Live Deployment Link - https://imhotep-iii.onrender.com/ 
+
+
 
 Option 2: Local Testing
 Follow the installation steps above
