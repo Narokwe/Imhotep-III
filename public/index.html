@@ -1,0 +1,120 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imhotep-III - Maternal & Child Health</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <h1>Imhotep-III</h1>
+                <span>Health • Finance • AI</span>
+            </div>
+            <div class="auth-buttons">
+                <button id="signInBtn" class="btn-secondary">Sign In</button>
+                <button id="signUpBtn" class="btn-primary">Sign Up</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- Health Wallet Section -->
+            <section id="healthWallet" class="card">
+                <h2>🩺 Health Wallet</h2>
+                
+                <!-- File Upload Option -->
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="recordUpload" accept=".pdf,.txt,.doc,.docx" hidden>
+                    <div class="upload-placeholder">
+                        <p>Upload medical records (ANC cards, immunization records, growth charts)</p>
+                        <p style="font-size: 0.9em; color: #666;">Supported: PDF, TXT, Word documents</p>
+                        <button class="btn-primary" onclick="document.getElementById('recordUpload').click()">
+                            Choose File
+                        </button>
+                    </div>
+                </div>
+
+                <!-- OR separator -->
+                <div style="text-align: center; margin: 1rem 0; color: #666;">OR</div>
+
+                <!-- Text Input Option -->
+                <div>
+                    <textarea 
+                        id="recordText" 
+                        placeholder="Paste your medical records here as text...
+Example: Patient: Sarah, 28 weeks pregnant. Regular ANC visits at 12, 20, and 28 weeks..."
+                        rows="4"
+                        style="width: 100%; padding: 1rem; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 1rem;"
+                    ></textarea>
+                    <button class="btn-primary" onclick="addHealthRecord()" style="width: 100%;">
+                        Add Health Record as Text
+                    </button>
+                </div>
+
+                <div id="uploadResult" class="upload-result"></div>
+            </section>
+
+            <!-- Token Rewards Section -->
+            <section id="tokenRewards" class="card">
+                <h2>💰 Token Rewards</h2>
+                <div class="wallet-balance">
+                    <div class="balance-card">
+                        <h3>IMT Balance</h3>
+                        <div id="tokenBalance" class="balance-amount">0 IMT</div>
+                    </div>
+                    <div class="rewards-breakdown">
+                        <h4>Earn IMT for:</h4>
+                        <ul>
+                            <li>✅ ANC Visits: 5 IMT</li>
+                            <li>💉 Immunizations: 5 IMT</li>
+                            <li>📈 Growth Milestones: 5 IMT</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Staking Pool Section -->
+            <section id="stakingPool" class="card">
+                <h2>🏦 Staking Pool</h2>
+                <div class="staking-interface">
+                    <div class="stake-input">
+                        <input type="number" id="stakeAmount" placeholder="Amount to stake" min="1">
+                        <button class="btn-primary" onclick="stakeTokens()">Stake Tokens</button>
+                    </div>
+                    <div class="staking-info">
+                        <p>📈 Earn 0.5% monthly interest</p>
+                        <p>⏳ 6-month lock period</p>
+                        <p id="stakedAmount">Currently Staked: 0 IMT</p>
+                        <button id="claimStakedBtn" class="btn-secondary" onclick="claimStakedTokens()" disabled>
+                            Claim Staked Tokens
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Assistant Section -->
+            <section id="aiAssistant" class="card">
+                <h2>🤖 AI Health Assistant</h2>
+                <div class="chat-container">
+                    <div id="chatMessages" class="chat-messages">
+                        <div class="message bot-message">
+                            Hello! I'm your Imhotep-III AI assistant. I can help you with pregnancy questions, child health concerns, and provide personalized insights based on your health records. How can I assist you today?
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="userInput" placeholder="Ask about your health records, symptoms, or concerns...">
+                        <button class="btn-primary" onclick="sendMessage()">Send</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

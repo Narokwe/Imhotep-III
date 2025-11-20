@@ -1,0 +1,34 @@
+{
+  "name": "imhotep-iii",
+  "version": "1.0.0",
+  "description": "AI-Powered Maternal and Child Health Platform for Africa",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "keywords": [
+    "health",
+    "AI",
+    "blockchain",
+    "maternal-health",
+    "google-genkit",
+    "gemini-ai",
+    "healthcare",
+    "africa",
+    "telemedicine",
+    "defi",
+    "tokens"
+  ],
+  "dependencies": {
+    "@genkit-ai/google-genai": "^1.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "genkit": "^1.0.0",
+    "multer": "^1.4.4",
+    "pdf-parse": "^1.1.4",
+    "node-fetch": "^3.3.2",
+    "uuid": "^9.0.0"
+  }
+}
