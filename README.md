@@ -6,7 +6,7 @@
 ## 🩺 Problem Statement
 Maternal and child health in Africa faces three critical challenges:
 1. **Fragmented health records** leading to repeated tests and missed vaccinations
-2. **Late health-seeking behavior** Reactive healthcare approach rather than Proactive approach
+2. **Late health-seeking behavior** -Reactive healthcare approach rather than Proactive approach
 3. **Limited financial access** to cater for healthcare costs
 
 ## 🚀 Solution
