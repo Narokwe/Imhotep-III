@@ -202,7 +202,11 @@ View Staked Amount: Check the "Currently Staked" display updates
 Simulate Interest: Wait a moment and check if staking information updates
 
 Sample Test Scenarios:
+
+
 Scenario 1: Pregnancy Consultation
+
+
 Ask: "I'm 6 months pregnant and experiencing back pain, is this normal?"
 
 Expected: AI provides pregnancy-related advice and when to seek medical care
@@ -212,12 +216,17 @@ Ask: "What vaccinations is Baby Janet missing based on her records?"
 
 Expected: AI identifies OPV 3 and Measles/Rubella 2 as pending
 
+
+
 Scenario 3: Financial Features
 Stake: 100 IMT tokens
 
 Check: Wallet balance decreases, staked amount increases
 
 Note: Tokens are locked for 6 months in simulation
+
+
+
 
 📁 Project Structure
 text
@@ -237,6 +246,9 @@ imhotep-iii/
 ├── .gitignore          # Git ignore rules
 └── README.md           # This file
 
+
+
+
 🔧 API Endpoints
 POST /api/upload-record - Upload health records (+ token rewards)
 
@@ -247,6 +259,9 @@ POST /api/stake - Token staking
 GET /api/wallet/:userId - Wallet balance
 
 GET /api/test-ai - AI connectivity test
+
+
+
 
 🌟 Key Features Demonstrated
 
@@ -264,6 +279,9 @@ GET /api/test-ai - AI connectivity test
 
 ✅ Automated token rewards for health actions
 
+
+
+
 📊 Expected Impact
 
 30% reduction in missed antenatal care visits
@@ -274,7 +292,13 @@ Financial empowerment for 50,000+ families
 
 Improved health outcomes across African communities
 
+
+
+
 We welcome contributions!! 
+
+
+
 
 📄 License
 
