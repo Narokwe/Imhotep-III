@@ -241,6 +241,7 @@ GET /api/wallet/:userId - Wallet balance
 GET /api/test-ai - AI connectivity test
 
 🌟 Key Features Demonstrated
+
 ✅ Google Genkit & Gemini AI integration
 
 ✅ RAG (Retrieval-Augmented Generation) system
@@ -267,4 +268,5 @@ Improved health outcomes across African communities
 We welcome contributions!! 
 
 📄 License
+
 This project is licensed under the MIT License - see the LICENSE file for details.
