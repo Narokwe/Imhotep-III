@@ -91,11 +91,17 @@ Method A: Upload Text File
 Create a new file called health-record.txt with this content:
 
 Child Name: Baby Janet
+
 Mother: Mary A.
+
 Date of Birth: 25 March 2023
+
 Place of Birth: Pumwani Maternity Hospital, Nairobi, Kenya
+
 Mode of Delivery: Normal vaginal delivery
+
 Birth Weight: 3.1 kg
+
 
 Immunization History:
 - At birth:
