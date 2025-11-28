@@ -101,13 +101,13 @@ Imhotep-III focuses on three key challenges in maternal and child healthcare acr
 ## 📁 Project Assets (for Capstone Submission)
 The following files are included in this repository:
 
-📄 **Project Proposal (PDF)**: `https://drive.google.com/file/d/1SP2AuoG_VRxf58PSgjXvXC3RhjsqdFxV/view?usp=sharing`
+📄 **Project Proposal (PDF)**: (https://drive.google.com/file/d/1SP2AuoG_VRxf58PSgjXvXC3RhjsqdFxV/view?usp=sharing)
 
-📊 **Project Slides (PDF)**: `https://drive.google.com/file/d/1V_iHz8BXtEH0bJDtyuQ4SHRvxlpfvoK1/view?usp=sharing`
+📊 **Project Slides (PDF)**: (https://drive.google.com/file/d/1V_iHz8BXtEH0bJDtyuQ4SHRvxlpfvoK1/view?usp=sharing)
 
 🎥 **Demo Video (< 3 min)**: [Download from Google Drive] (https://drive.google.com/drive/folders/1YVMY5L8iFUGMaoI1piKGZ10wCdEqxMwZ?usp=sharing)
 
-🧩 **BwAI Codelabs Screenshot**: `https://drive.google.com/file/d/1rc0SWPL3P9TA-jowYA5GGqSwAzlQIRkm/view?usp=sharing`
+🧩 **BwAI Codelabs Screenshot**: (https://drive.google.com/file/d/1rc0SWPL3P9TA-jowYA5GGqSwAzlQIRkm/view?usp=sharing)
 
 
 
@@ -162,8 +162,13 @@ Visit http://localhost:3000 in your browser.
 
 ☁️ Deployment to Google Cloud Run
 
+
+
 gcloud config set project YOUR_GCP_PROJECT_ID
 gcloud config set run/region us-central1
+
+
+
 
 gcloud run deploy imhotep-iii \
   --source . \
@@ -172,43 +177,46 @@ gcloud run deploy imhotep-iii \
   --memory 512Mi \
   --allow-unauthenticated \
   --set-env-vars XRPL_WSS_URL=wss://testnet.xrpl-labs.com,GOOGLE_CLOUD_PROJECT=YOUR_GCP_PROJECT_ID
-After deployment, update the badge at the top of this README with the new Cloud Run URL.
 
-📁 Project Assets (for Capstone Submission)
-The following files are included in this repository:
 
-📄 Project Proposal (PDF): docs/imhotep-iii-project-proposal.pdf
 
-📊 Project Slides (PDF): docs/imhotep-iii-project-slides.pdf
-
-🎥 Demo Video (< 3 min): demo/imhotep-iii-demo.mp4
-
-🧩 BwAI Codelabs Screenshot: assets/codelabs-screenshot.png
 
 
 
 
 
 🧪 Example Usage Flow
+
+
 Open the deployed app.
+
 
 A new USER_ID is generated (stored locally).
 
+
 Upload or paste maternal/child health record text.
+
 
 Submit to save → record stored in Firestore and anchored on XRPL testnet.
 
+
 Ask the AI assistant: “Give me some insights about my health records.”
 
+
 Receive a contextual response based on your stored records (RAG).
+
+
 
 
 ⚠️ Disclaimer
 This prototype does not provide medical diagnosis or treatment.
 
+
 All AI outputs are informational and must be confirmed with a qualified healthcare professional.
 
+
 Do not use this system for real patient care without regulatory approvals, clinical validation, and security hardening.
+
 
 
 
