@@ -1,16 +1,15 @@
 import { genkit } from 'genkit';
 import { googleAI } from '@genkit-ai/google-genai';
-// You can keep dotenv, but we won’t rely on it for now
 import { config } from 'dotenv';
 
 config();
 
-// ❌ TEMP: Hardcode the key so we know Cloud Run is fine.
-// Replace with your real key string:
-const apiKey = 'AIzaSyBZuD7LeUD4Qbeg-QN_soKQarYSfx5FJIc';  // <-- put your AIza... key here
+// ✅ Read from environment variable GEMINI_API_KEY
+const apiKey = process.env.GEMINI_API_KEY;
 
 if (!apiKey) {
-  console.error('❌ No Google AI API key found. Please set an API key.');
+  console.error('❌ No GEMINI_API_KEY found in environment.');
+  throw new Error('Missing GEMINI_API_KEY environment variable.');
 }
 
 const ai = genkit({
@@ -41,7 +40,6 @@ function extractTextFromGenkitResult(raw) {
 }
 
 export async function generateResponse(prompt, options = {}) {
-  // ✅ We KNOW apiKey is defined now
   try {
     console.log('🔄 [GENKIT] Calling ai.generate with model googleai/gemini-2.5-flash');
 
