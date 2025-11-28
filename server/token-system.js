@@ -1,4 +1,3 @@
-// server/token-system.js
 const userTokens = new Map();
 
 export class TokenSystem {
@@ -34,7 +33,7 @@ export class TokenSystem {
     user.stakingStart = user.stakingStart ?? new Date();
     return {
       staked: user.staked,
-      unlockDate: new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000) // 6 months
+      unlockDate: new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000) 
     };
   }
 
@@ -43,7 +42,7 @@ export class TokenSystem {
     if (!user || !user.stakingStart) return 0;
     const monthsStaked = (new Date() - new Date(user.stakingStart)) / (30 * 24 * 60 * 60 * 1000);
     const months = Math.min(Math.max(0, monthsStaked), 6);
-    return user.staked * 0.005 * months; // 0.5% monthly
+    return user.staked * 0.005 * months; 
   }
 
   static claimStakedTokens(userId) {

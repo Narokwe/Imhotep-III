@@ -1,4 +1,4 @@
-/* public/main.css */
+
 * {
     margin: 0;
     padding: 0;
@@ -38,6 +38,30 @@ header {
     align-items: center;
     padding: 0 2rem;
 }
+
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.logo img {
+    max-height: 60px;
+    display: block;
+}
+
+.logo-text h1 {
+    color: var(--primary);
+    font-size: 2rem;
+    margin: 0 0 0.2rem 0;
+}
+
+.logo-text span {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
 
 .logo h1 {
     color: var(--primary);
@@ -106,7 +130,7 @@ header {
     font-size: 1.5rem;
 }
 
-/* Health Wallet Styles */
+
 .upload-area {
     border: 2px dashed #ddd;
     border-radius: 12px;
@@ -133,7 +157,7 @@ header {
     display: none;
 }
 
-/* Token Rewards Styles */
+
 .wallet-balance {
     display: flex;
     gap: 2rem;
@@ -163,7 +187,7 @@ header {
     border-bottom: 1px solid #eee;
 }
 
-/* Staking Pool Styles */
+
 .stake-input {
     display: flex;
     gap: 1rem;
@@ -183,7 +207,7 @@ header {
     color: var(--text-light);
 }
 
-/* AI Assistant Styles */
+
 .chat-container {
     height: 400px;
     display: flex;
@@ -199,11 +223,13 @@ header {
     margin-bottom: 1rem;
 }
 
+
 .message {
     padding: 1rem;
     margin-bottom: 1rem;
     border-radius: 12px;
-    max-width: 80%;
+    max-width: 100%;
+    white-space: pre-wrap;
 }
 
 .bot-message {
@@ -218,30 +244,50 @@ header {
     margin-left: auto;
 }
 
+
 .chat-input {
     display: flex;
     gap: 1rem;
+    align-items: center;
 }
 
+.chat-input textarea,
 .chat-input input {
     flex: 1;
     padding: 0.75rem;
     border: 2px solid #ddd;
     border-radius: 8px;
     font-size: 1rem;
+    min-height: 48px;
 }
 
-/* Responsive Design */
+
+.spinner {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 3px solid rgba(0,0,0,0.08);
+    border-top-color: rgba(0,0,0,0.6);
+    animation: spin 1s linear infinite;
+    display: inline-block;
+}
+
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+
 @media (max-width: 768px) {
     .container {
         grid-template-columns: 1fr;
     }
-    
+
     .header-container {
         flex-direction: column;
         gap: 1rem;
     }
-    
+
     .wallet-balance {
         flex-direction: column;
     }

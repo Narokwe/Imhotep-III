@@ -1,41 +1,48 @@
-// server/rag-system.js
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import { generateResponse } from './genkit-setup.js';
 
-// ---------------- PATH SETUP ----------------
+// ---- Firebase Admin imports ----
+import { initializeApp, applicationDefault, cert } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import fs from 'fs';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// ---------------- FIREBASE INIT ----------------
 
-const STORE_PATH = path.join(__dirname, 'vector-store.json');
+// We'll lazily init Firestore so this file can be imported safely in any environment.
+let firestoreInstance = null;
 
-// Ensure store file exists
-function ensureStore() {
-  const dir = path.dirname(STORE_PATH);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+function initFirestore() {
+  if (firestoreInstance) return firestoreInstance;
+
+  try {
+    // Option A: explicit service account JSON via file path
+    const saPath = process.env.SERVICE_ACCOUNT_KEY_PATH; 
+    const saJson = process.env.SERVICE_ACCOUNT_JSON;     
+
+    if (saPath && fs.existsSync(saPath)) {
+      const serviceAccount = JSON.parse(fs.readFileSync(saPath, 'utf8'));
+      initializeApp({ credential: cert(serviceAccount) });
+      console.log('[RAGSystem] Firebase initialized using SERVICE_ACCOUNT_KEY_PATH');
+    } else if (saJson) {
+      const serviceAccount = JSON.parse(saJson);
+      initializeApp({ credential: cert(serviceAccount) });
+      console.log('[RAGSystem] Firebase initialized using SERVICE_ACCOUNT_JSON');
+    } else {
+      // Option B: use Application Default Credentials (Cloud Run with attached service account)
+      initializeApp({ credential: applicationDefault() });
+      console.log('[RAGSystem] Firebase initialized using applicationDefault()');
+    }
+
+    firestoreInstance = getFirestore();
+    return firestoreInstance;
+  } catch (err) {
+    console.error('[RAGSystem] Failed to initialize Firebase Admin:', err);
+    throw err;
   }
-  if (!fs.existsSync(STORE_PATH)) {
-    fs.writeFileSync(
-      STORE_PATH,
-      JSON.stringify({ vectors: [] }, null, 2),
-      'utf8'
-    );
-  }
-}
-ensureStore();
-
-function readStore() {
-  ensureStore();
-  return JSON.parse(fs.readFileSync(STORE_PATH, 'utf8'));
 }
 
-function writeStore(obj) {
-  fs.writeFileSync(STORE_PATH, JSON.stringify(obj, null, 2), 'utf8');
-}
+// Name of the Firestore collection we store vectors in
+const VECTORS_COLLECTION = 'health_vectors';
 
 // ---------------- CHUNKING ----------------
 
@@ -108,21 +115,24 @@ function cosineTF(tf1, tf2) {
   return dot / (Math.sqrt(norm1) * Math.sqrt(norm2));
 }
 
-// ---------------- RAG SYSTEM (LOCAL) ----------------
+// ---------------- RAG SYSTEM (FIRESTORE-BACKED) ----------------
 
 export class RAGSystem {
   /**
    * Index a health record for a user: chunk -> store as plain text + token stats
    * NO calls to external embed APIs (works with 0 embedding quota).
+   * Now stored in Firestore instead of vector-store.json.
    */
   static async processHealthRecord(userId, recordText) {
     if (!userId) throw new Error('UserId required for indexing');
     if (!recordText || !recordText.trim()) throw new Error('Empty record text');
 
+    const db = initFirestore();
     const chunks = chunkText(recordText, 900);
-    const store = readStore();
 
+    const batch = db.batch();
     const added = [];
+
     for (const chunk of chunks) {
       const tokens = tokenize(chunk);
       const tf = termFreq(tokens);
@@ -131,22 +141,22 @@ export class RAGSystem {
         id: uuidv4(),
         userId,
         text: chunk,
-        // "embedding" field repurposed to store term frequencies
-        // so structure of vector-store.json remains similar
         tf,
         tokenCount: tokens.length,
         timestamp: new Date().toISOString(),
       };
 
-      store.vectors.push(item);
+      const docRef = db.collection(VECTORS_COLLECTION).doc(item.id);
+      batch.set(docRef, item);
       added.push(item);
     }
 
     if (added.length > 0) {
-      writeStore(store);
+      await batch.commit();
+      console.log(`[RAGSystem] Indexed ${added.length} chunks for user ${userId} into Firestore`);
     }
 
-    // Reward logic (unchanged from your original)
+    // Reward logic
     const rewards = {
       anc: /anc|antenatal|antenatal care|antenatal visit/i.test(recordText) ? 3 : 0,
       immunization: /immuni|vaccin|immunization|vaccine/i.test(recordText) ? 3 : 0,
@@ -158,11 +168,23 @@ export class RAGSystem {
 
   /**
    * Retrieve relevant chunks for this user & query using local keyword similarity.
+   * Now reads from Firestore 
    */
   static async retrieveRelevant(userId, query, topK = 4) {
-    const store = readStore();
-    const candidates = store.vectors.filter((v) => v.userId === userId);
-    if (!candidates.length) return [];
+    const db = initFirestore();
+
+    // Get all vectors for this user.
+    const snap = await db
+      .collection(VECTORS_COLLECTION)
+      .where('userId', '==', userId)
+      .get();
+
+    if (snap.empty) return [];
+
+    const candidates = [];
+    snap.forEach((doc) => {
+      candidates.push(doc.data());
+    });
 
     const qTokens = tokenize(query);
     const qTF = termFreq(qTokens);
@@ -180,9 +202,23 @@ export class RAGSystem {
     }));
   }
 
-  static getUserHealthSummary(userId) {
-    const store = readStore();
-    const records = store.vectors.filter((v) => v.userId === userId);
+  /**
+   * Summary for a user's stored records.
+   * Now pulls from Firestore.
+   */
+  static async getUserHealthSummary(userId) {
+    const db = initFirestore();
+    const snap = await db
+      .collection(VECTORS_COLLECTION)
+      .where('userId', '==', userId)
+      .orderBy('timestamp', 'asc')
+      .get();
+
+    const records = [];
+    snap.forEach((doc) => {
+      records.push(doc.data());
+    });
+
     return {
       userId,
       totalChunks: records.length,
@@ -195,7 +231,7 @@ export class RAGSystem {
   }
 
   /**
-   * Chat with RAG: retrieve local contexts, build a system prompt, call Gemini.
+   * Chat with RAG: retrieve contexts, build a system prompt, call Gemini.
    */
   static async chatWithHealthContext(userId, userMessage) {
     let retrieved = [];

@@ -1,18 +1,26 @@
-<!-- public/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Imhotep-III - Maternal & Child Health</title>
+
+    
     <link rel="stylesheet" href="main.css">
+
+    
+    <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body>
     <header>
         <div class="header-container">
             <div class="logo">
-                <h1>Imhotep-III</h1>
-                <span>Health • Finance • AI</span>
+                <!-- 🖼️ Logo image in header -->
+                <img src="/logo.png" alt="Imhotep-III Logo" style="max-height: 60px; margin-right: 12px;">
+                <div class="logo-text">
+                    <h1>Imhotep-III</h1>
+                    <span>Decentralized Health • Decentralized Finance • AI (DeSciAI)</span>
+                </div>
             </div>
             <div class="auth-buttons">
                 <button id="signInBtn" class="btn-secondary">Sign In</button>
@@ -23,11 +31,11 @@
 
     <main>
         <div class="container">
-            <!-- Health Wallet Section -->
+            
             <section id="healthWallet" class="card">
                 <h2>🩺 Health Wallet</h2>
                 
-                <!-- File Upload Option -->
+                
                 <div class="upload-area" id="uploadArea">
                     <input type="file" id="recordUpload" accept=".pdf,.txt,.doc,.docx" hidden>
                     <div class="upload-placeholder">
@@ -39,10 +47,10 @@
                     </div>
                 </div>
 
-                <!-- OR separator -->
+                
                 <div style="text-align: center; margin: 1rem 0; color: #666;">OR</div>
 
-                <!-- Text Input Option -->
+                
                 <div>
                     <textarea 
                         id="recordText" 
@@ -59,7 +67,7 @@ Example: Patient: Sarah, 28 weeks pregnant. Regular ANC visits at 12, 20, and 28
                 <div id="uploadResult" class="upload-result"></div>
             </section>
 
-            <!-- Token Rewards Section -->
+            
             <section id="tokenRewards" class="card">
                 <h2>💰 Token Rewards</h2>
                 <div class="wallet-balance">
@@ -78,7 +86,7 @@ Example: Patient: Sarah, 28 weeks pregnant. Regular ANC visits at 12, 20, and 28
                 </div>
             </section>
 
-            <!-- Staking Pool Section -->
+            
             <section id="stakingPool" class="card">
                 <h2>🏦 Staking Pool</h2>
                 <div class="staking-interface">
@@ -97,7 +105,7 @@ Example: Patient: Sarah, 28 weeks pregnant. Regular ANC visits at 12, 20, and 28
                 </div>
             </section>
 
-            <!-- AI Assistant Section -->
+            
             <section id="aiAssistant" class="card">
                 <h2>🤖 AI Health Assistant</h2>
                 <div class="chat-container">
@@ -106,9 +114,27 @@ Example: Patient: Sarah, 28 weeks pregnant. Regular ANC visits at 12, 20, and 28
                             Hello! I'm your Imhotep-III AI assistant. I can help you with pregnancy questions, child health concerns, and provide personalized insights based on your health records. How can I assist you today?
                         </div>
                     </div>
+
                     <div class="chat-input">
-                        <input type="text" id="userInput" placeholder="Ask about your health records, symptoms, or concerns...">
-                        <button class="btn-primary" onclick="sendMessage()">Send</button>
+                        
+                        <textarea
+                            id="userInput"
+                            placeholder="Ask about your health records, symptoms, or concerns...
+(Shift+Enter for new line, Enter to send)"
+                            rows="3"
+                            style="resize: vertical;"
+                        ></textarea>
+
+                        <button id="sendBtn" class="btn-primary" onclick="sendMessage()">Send</button>
+
+                        
+                        <div
+                            id="chatSpinner"
+                            class="spinner"
+                            aria-hidden="true"
+                            style="display: none;"
+                            title="Processing your question..."
+                        ></div>
                     </div>
                 </div>
             </section>

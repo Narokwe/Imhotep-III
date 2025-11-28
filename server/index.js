@@ -1,4 +1,3 @@
-// server/index.js
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
@@ -8,6 +7,7 @@ import { RAGSystem } from './rag-system.js';
 import { TokenSystem } from './token-system.js';
 import { generateResponse } from './genkit-setup.js';
 import { config } from 'dotenv';
+import { submitRecordHash, computeSha256Hex } from './xrpl.js';
 
 config();
 
@@ -21,12 +21,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
+// -------------------------
 // Upload file
+// -------------------------
 app.post('/api/upload-record', upload.single('record'), async (req, res) => {
   try {
     const { userId } = req.body;
     const file = req.file;
 
+    console.log('[API/upload-record] Body:', req.body);
     if (!userId) {
       return res.status(400).json({ success: false, error: 'userId required' });
     }
@@ -46,7 +49,7 @@ app.post('/api/upload-record', upload.single('record'), async (req, res) => {
       file.originalname.endsWith('.docx') ||
       file.originalname.endsWith('.doc')
     ) {
-      // VERY basic fallback for Word files (may not extract properly)
+      // basic fallback for Word files
       text = file.buffer.toString('utf8').replace(/[^\x20-\x7E\n\r\t]/g, ' ');
     } else {
       return res
@@ -58,16 +61,34 @@ app.post('/api/upload-record', upload.single('record'), async (req, res) => {
       text = `Document ${file.originalname} uploaded but no text could be extracted. Please paste text directly.`;
     }
 
+    // Process through RAG + token system
     TokenSystem.initializeUser(userId);
     const rewards = await RAGSystem.processHealthRecord(userId, text);
     const totalAwarded = TokenSystem.awardTokens(userId, rewards);
+
+    // -------- XRPL ANCHORING --------
+    const sha = computeSha256Hex(text);
+    let xrplResult = null;
+    try {
+      xrplResult = await submitRecordHash(sha);
+      // Treat temREDUNDANT as success
+      if (xrplResult?.engine_result?.toLowerCase() === 'temredundant') {
+        xrplResult.success = true;
+      }
+    } catch (e) {
+      console.error('XRPL submit error (upload-record)', e);
+      xrplResult = { success: false, error: e?.message || String(e) };
+    }
 
     res.json({
       success: true,
       rewards,
       totalAwarded,
       message: `Health record processed successfully! Earned ${totalAwarded} IMT tokens!`,
-      extractedText: text.substring(0, 400)
+      extractedText: text.substring(0, 400),
+      anchored: xrplResult?.success === true,
+      xrpl: xrplResult,
+      recordHash: sha
     });
   } catch (err) {
     console.error('Upload error', err);
@@ -75,10 +96,14 @@ app.post('/api/upload-record', upload.single('record'), async (req, res) => {
   }
 });
 
+// -------------------------
 // Add text record
+// -------------------------
 app.post('/api/add-record', async (req, res) => {
   try {
     const { userId, recordText } = req.body;
+    console.log('[API/add-record] Body:', req.body);
+
     if (!userId) {
       return res.status(400).json({ success: false, error: 'userId required' });
     }
@@ -86,15 +111,32 @@ app.post('/api/add-record', async (req, res) => {
       return res.status(400).json({ success: false, error: 'No recordText provided' });
     }
 
+    // Process through RAG + token system
     TokenSystem.initializeUser(userId);
     const rewards = await RAGSystem.processHealthRecord(userId, recordText);
     const totalAwarded = TokenSystem.awardTokens(userId, rewards);
+
+    // -------- XRPL ANCHORING --------
+    const sha = computeSha256Hex(recordText);
+    let xrplResult = null;
+    try {
+      xrplResult = await submitRecordHash(sha);
+      if (xrplResult?.engine_result?.toLowerCase() === 'temredundant') {
+        xrplResult.success = true;
+      }
+    } catch (e) {
+      console.error('XRPL submit error (add-record)', e);
+      xrplResult = { success: false, error: e?.message || String(e) };
+    }
 
     res.json({
       success: true,
       rewards,
       totalAwarded,
-      message: `Health record added. Earned ${totalAwarded} IMT tokens.`
+      message: `Health record added. Earned ${totalAwarded} IMT tokens.`,
+      anchored: xrplResult?.success === true,
+      xrpl: xrplResult,
+      recordHash: sha
     });
   } catch (err) {
     console.error('add-record error', err);
@@ -102,34 +144,50 @@ app.post('/api/add-record', async (req, res) => {
   }
 });
 
-// Chat endpoint (NO human-written fallback – only real AI or explicit error)
+// -------------------------
+// Chat endpoint
+// Uses Firestore RAG retrieval directly
+// -------------------------
 app.post('/api/chat', async (req, res) => {
   try {
     const { userId, message } = req.body;
+    console.log('[API/chat] Body:', req.body);
+
+    if (!userId) {
+      return res.status(400).json({ success: false, error: 'userId required' });
+    }
     if (!message || !message.trim()) {
       return res.status(400).json({ success: false, error: 'Message required' });
     }
 
-    // 1) Get user health summary (for context)
-    let summary;
+    let retrieved = [];
     try {
-      summary = RAGSystem.getUserHealthSummary(userId);
+      retrieved = await RAGSystem.retrieveRelevant(userId, message, 5);
+      console.log(
+        `[RAGSystem] Retrieved ${retrieved.length} chunks from Firestore for user ${userId}`
+      );
     } catch (e) {
-      console.warn('Warning: could not fetch health summary', e?.message || e);
-      summary = { userId, totalChunks: 0, latestChunks: [] };
+      console.error('Error retrieving RAG context, proceeding without it:', e);
+      retrieved = [];
     }
+
+    const hasRecords = Array.isArray(retrieved) && retrieved.length > 0;
 
     const contextHeader =
       'You are Imhotep-III, an AI assistant for maternal and child health in Africa.\n' +
-      "Use the user's health records below to ground your answer when available. " +
-      'If insufficient info, say so clearly. Always encourage local medical advice and urgent care when needed.\n\n';
+      (hasRecords
+        ? 'You have access to some stored health record excerpts for this user. Use them to personalize your answer, but do NOT reveal or quote them verbatim. Summarize key points instead.\n'
+        : 'You DO NOT have any stored health records for this user. You must clearly say you are answering without access to their personal records.\n') +
+      'Always encourage users to follow local medical advice and seek urgent care when needed.\n\n';
 
-    let contextText = '[No stored health records found for this user.]';
-    if (summary && summary.totalChunks > 0 && Array.isArray(summary.latestChunks)) {
-      contextText = summary.latestChunks
-        .map((c, i) => `---\nChunk ${i + 1} (id=${c.id}):\n${c.text}`)
-        .join('\n\n');
-    }
+    const contextText = hasRecords
+      ? retrieved
+          .map(
+            (c, i) =>
+              `---\nContext ${i + 1} (score=${c.score?.toFixed?.(3) ?? 'n/a'}):\n${c.text}`
+          )
+          .join('\n\n')
+      : '[No stored health records found for this user in the database.]';
 
     const systemPrompt =
       `${contextHeader}${contextText}\n\n` +
@@ -146,7 +204,6 @@ app.post('/api/chat', async (req, res) => {
       JSON.stringify(raw).slice(0, 400)
     );
 
-    // 2) NORMALIZE AI RESPONSE TO PLAIN TEXT
     let aiText;
     if (typeof raw === 'string') {
       aiText = raw;
@@ -164,7 +221,6 @@ app.post('/api/chat', async (req, res) => {
       aiText = '';
     }
 
-    // 3) If AI text is empty, return explicit error (no server-generated content)
     if (!aiText || !aiText.trim()) {
       console.warn('[CHAT] AI returned empty text, sending error to client.');
       return res.status(200).json({
@@ -173,7 +229,6 @@ app.post('/api/chat', async (req, res) => {
       });
     }
 
-    // Normal case: non-empty AI text
     res.json({ success: true, response: aiText.trim() });
   } catch (err) {
     console.error('chat error', err);
@@ -184,7 +239,9 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
+// -------------------------
 // Staking endpoints
+// -------------------------
 app.post('/api/stake', (req, res) => {
   try {
     const { userId, amount } = req.body;
@@ -235,7 +292,9 @@ app.get('/api/health-records/:userId', (req, res) => {
   }
 });
 
-// Test AI connectivity (already normalized)
+// -------------------------
+// Test AI connectivity
+// -------------------------
 app.get('/api/test-ai', async (req, res) => {
   try {
     const raw = await generateResponse(
