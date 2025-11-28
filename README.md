@@ -1,5 +1,5 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Deployed on Google Cloud Run](https://img.shields.io/badge/Deployed-GCP%20Cloud%20Run-blue)](https://imhotep-iii-684748583012.us-central1.run.app)
+[![Deployed on Google Cloud Run](https://img.shields.io/badge/Deployed-GCP%20Cloud%20Run-blue)](https://https://imhotep-iii-684748583012.us-central1.run.app)
 
 # Imhotep-III: AI, Blockchain & DeFi for Maternal and Child Health
 
